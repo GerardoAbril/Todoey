@@ -31,7 +31,14 @@
                             <outlet property="delegate" destination="SKY-33-Czu" id="Bz7-xd-uC0"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Todoey" id="1Yy-WS-Et1"/>
+                    <navigationItem key="navigationItem" title="Todoey" id="1Yy-WS-Et1">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="RD5-Up-RWZ">
+                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="addButtonPressed:" destination="SKY-33-Czu" id="aM7-Nh-YeP"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qXB-Q2-67v" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
