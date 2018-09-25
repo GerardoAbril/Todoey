@@ -17,7 +17,6 @@ class ToDoViewListController: UITableViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         print (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
 
         //Call this item to load items from Database into app
@@ -59,9 +58,9 @@ class ToDoViewListController: UITableViewController{
     */
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //print (itemArray[indexPath.row])
+//       Grabs current selected object and updates objects
+//       itemArray[indexPath.row].setValue("Completed", forKey: "title")
         
-        
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         //long version of method above
 //        if itemArray[indexPath.row].done == false {
 //            itemArray[indexPath.row].done = true
@@ -69,13 +68,22 @@ class ToDoViewListController: UITableViewController{
 //        else{
 //            itemArray[indexPath.row].done = false
 //        }
+        
+        /*
+         This is how you destroy
+         context.delete(itemArray[indexPath.row])
+         itemArray.remove(at: indexPath.row)
+         */
+      
 
+        //itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
         saveItems()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    //Mark - Add New Items
+    //Mark: - Add New Items
     
     @IBAction func addButtonPressed(_ sender: Any) {
         
@@ -101,6 +109,7 @@ class ToDoViewListController: UITableViewController{
         present(alert, animated: true, completion: nil)
     }
     
+    //Mark: - Save Data
     //This saves any data that is added into the Database
     func saveItems () {
         
@@ -112,15 +121,28 @@ class ToDoViewListController: UITableViewController{
         self.tableView.reloadData()
     }
     
+    //Mark: - Load Data
     //This loads the data from the Core Data Database into App
-    func loadItems (){
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    func loadItems (_ request: NSFetchRequest<Item> = Item.fetchRequest()){
         do{
             itemArray = try context.fetch(request)
         } catch {
             print (error)
         }
     }
+    
 }
 
-
+//Mark: - Search bar methods
+extension ToDoViewListController: UISearchBarDelegate{
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    
+        //[cd] = Case and diacretic sensitive
+        request.predicate = NSPredicate (format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadItems(request)
+    }
+}
