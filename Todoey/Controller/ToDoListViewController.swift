@@ -12,18 +12,17 @@ import CoreData
 class ToDoViewListController: UITableViewController{
 
     var itemArray = [Item] ()
+    var selectedCategory : Category? {
+        didSet{
+            loadItems()
+        }
+    }
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         print (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-
-        //Call this item to load items from Database into app
-        loadItems ()
-//        if let items = UserDefaults.array(forKey: "ToDoListArray") as? [Item]{
-//            itemArray = items
-//        }
     }
     
     //Mark = TableView Datasource Methods
@@ -96,6 +95,7 @@ class ToDoViewListController: UITableViewController{
             let newItem = Item (context: self.context)
             newItem.title = textField.text!
             newItem.done = false
+            newItem.parentCategory = self.selectedCategory
             self.itemArray.append(newItem)
             self.saveItems()
             
@@ -123,7 +123,18 @@ class ToDoViewListController: UITableViewController{
     
     //Mark: - Load Data
     //This loads the data from the Core Data Database into App
-    func loadItems (_ request: NSFetchRequest<Item> = Item.fetchRequest()){
+    func loadItems (_ request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        }else{
+            request.predicate = categoryPredicate
+        }
+//        let compoundPredicate = NSCompoundPredicate (andPredicateWithSubpredicates: [categoryPredicate, predicate])
+//
+//        request.predicate = compoundPredicate
+        
         do{
             itemArray = try context.fetch(request)
         } catch {
