@@ -13,7 +13,7 @@ class ToDoViewListController: UITableViewController{
 
     var todoItems : Results<Item>?
     let realm = try! Realm()
-    
+    let date = Date ()
     var selectedCategory : Category? {
         didSet{
             loadItems()
@@ -58,29 +58,6 @@ class ToDoViewListController: UITableViewController{
      whenever the user selects a single cell
     */
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //print (itemArray[indexPath.row])
-//       Grabs current selected object and updates objects
-//       itemArray[indexPath.row].setValue("Completed", forKey: "title")
-        
-        //long version of method above
-//        if itemArray[indexPath.row].done == false {
-//            itemArray[indexPath.row].done = true
-//        }
-//        else{
-//            itemArray[indexPath.row].done = false
-//        }
-        
-        /*
-         This is how you destroy
-         context.delete(itemArray[indexPath.row])
-         itemArray.remove(at: indexPath.row)
-         */
-      
-
-        //itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
-        //saveItems()
-        
         if let item = todoItems?[indexPath.row] {
             do{
             try realm.write {
@@ -109,15 +86,14 @@ class ToDoViewListController: UITableViewController{
                     try self.realm.write {
                         let newItem = Item ()
                         newItem.title = textField.text!
+                        newItem.dateCreated = self.date
                         currentCategory.items.append(newItem)
                     }
                 }catch{
                     print (error)
                 }
             }
-            
             self.tableView.reloadData()
-
         }
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
@@ -131,35 +107,24 @@ class ToDoViewListController: UITableViewController{
     //Mark: - Load Data
     //This loads the data from the Core Data Database into App
     func loadItems (){
-        
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
-        
         tableView.reloadData()
-        
     }
-    
 }
 
 //Mark: - Search bar methods
-//extension ToDoViewListController: UISearchBarDelegate{
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        let request : NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        //[cd] = Case and diacretic sensitive
-//        request.predicate = NSPredicate (format: "title CONTAINS[cd] %@", searchBar.text!)
-//
-//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//
-//        loadItems(request)
-//    }
-//
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchBar.text?.count == 0{
-//            loadItems()
-//            DispatchQueue.main.async {
-//                searchBar.resignFirstResponder()
-//            }
-//        }
-//
-//    }
-//}
+extension ToDoViewListController: UISearchBarDelegate{
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        todoItems = todoItems?.filter("title CONTAINS [cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        tableView.reloadData()
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0{
+            loadItems()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+}
