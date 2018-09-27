@@ -15,11 +15,11 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.rowHeight = 80.0
+        tableView.rowHeight = 75.0
     }
     
     
-    //TableView Datasource Methods
+    //Mark: - TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! SwipeTableViewCell
@@ -31,27 +31,20 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
         guard orientation == .right else { return nil }
         
         let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            print ("Delete cell")
-            
             self.updateModel(at: indexPath)
-
         }
-        
-        // customize the action appearance
         deleteAction.image = UIImage(named: "delete-icon")
-        
         return [deleteAction]
     }
     
-    func collectionView(_ collectionView: UICollectionView, editActionsOptionsForItemAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
+    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        var options = SwipeTableOptions()
         options.expansionStyle = .destructive
-        options.transitionStyle = .reveal
         return options
     }
     
     func updateModel (at indexPath: IndexPath){
-        //Update our data model
+        print ("Item deleted from superclass")
     }
 
 }

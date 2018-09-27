@@ -9,6 +9,7 @@
 import UIKit
 import RealmSwift
 import SwipeCellKit
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController{
 
@@ -19,24 +20,27 @@ class CategoryViewController: SwipeTableViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories ()
-
+        tableView.separatorStyle = .none
     }
     
-    //Mark: - TableView Datasource Methods
+//Mark: - TableView Datasource Methods
     override func tableView (_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
         return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
        let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
         
-        return cell
+       if let category = categories?[indexPath.row]{
+            cell.textLabel?.text = category.name
+            guard let categoryColor = UIColor(hexString: category.color) else {fatalError()}
+            cell.backgroundColor = categoryColor
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+        }
+       return cell
     }
-
     
-    
-    //Mark: - TableView Delegate Methods
+//Mark: - TableView Delegate Methods
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
             performSegue(withIdentifier: "goToItems", sender: self)
@@ -50,7 +54,7 @@ class CategoryViewController: SwipeTableViewController{
         }
     }
     
-    //Mark: - Data Manipulation Methods
+//Mark: - Data Manipulation Methods
 
     func save(_ category: Category){
         do{
@@ -64,13 +68,12 @@ class CategoryViewController: SwipeTableViewController{
     }
     
     func loadCategories (){
-        
         categories = realm.objects(Category.self)
-        
         tableView.reloadData()
     }
     
-    //Mark: - Delete Data From Swipe
+//Mark: - Delete Data From Swipe
+    
     override func updateModel(at indexPath: IndexPath) {
         if let categoryForDeletion = self.categories?[indexPath.row]{
             do {
@@ -83,7 +86,7 @@ class CategoryViewController: SwipeTableViewController{
         }
     }
 
-    //Mark: - Add New Categories
+//Mark: - Add New Categories
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
@@ -94,17 +97,15 @@ class CategoryViewController: SwipeTableViewController{
         let action = UIAlertAction (title: "Add", style: .default) { (action) in
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.color = UIColor.randomFlat.hexValue()
             self.save(newCategory)
             
         }
         alert.addAction(action)
-
         alert.addTextField { (field) in
             textField = field
             textField.placeholder = "Add new category"
         }
-        
         present(alert, animated: true, completion: nil)
     }
-    
 }
